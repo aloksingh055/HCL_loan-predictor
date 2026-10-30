@@ -1,0 +1,50 @@
+# ---------- Local PostgreSQL (binaries + database cluster) ----------
+Postgresql/
+pgsql/
+pgdata/
+postmaster.pid
+
+# ---------- Python ----------
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.coverage
+htmlcov/
+build/
+dist/
+
+# ---------- Virtual environments ----------
+venv/
+.venv/
+env/
+
+# ---------- Secrets / local config ----------
+.env
+.env.*
+!.env.example
+.streamlit/secrets.toml
+
+# ---------- Jupyter ----------
+.ipynb_checkpoints/
+
+# ---------- Data (dataset Git mein nahi jaata) ----------
+data/
+
+# ---------- ML experiment artifacts ----------
+mlruns/
+mlartifacts/
+*.log
+
+# ---------- Trained model ----------
+# Abhi tracked rahega taaki repo clone karke API chal sake.
+# Agar model file badi hai (GitHub limit 100 MB), toh neeche wali lines uncomment karo:
+# *.pkl
+# *.joblib
+
+# ---------- Editors / OS ----------
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+desktop.ini

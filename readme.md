@@ -45,29 +45,41 @@ These are **targets**. Measured results will be added to this README after the m
 ## Project Structure
 
 ```
-loan-risk-predictor/
-├── dashboard/                      # Streamlit front end
-│   ├── app.py                      # Home page + backend health check
-│   ├── requirements.txt
-│   ├── .env                        # Backend URL (not committed)
-│   ├── .streamlit/config.toml
-│   ├── api/
-│   │   └── client.py               # ALL backend API calls live here
-│   ├── pages/
-│   │   ├── 1_Single_Prediction.py
-│   │   ├── 2_Batch_Scoring.py
-│   │   ├── 3_Explainability_SHAP.py
-│   │   ├── 4_Model_Performance.py
-│   │   └── 5_Drift_Monitoring.py
-│   ├── components/
-│   │   ├── charts.py               # Risk gauge
-│   │   └── metrics.py
-│   └── utils/
-│       ├── config.py               # Reads API_BASE_URL from .env
-│       └── options.py              # Dropdown values for categorical inputs
-├── api.py                          # FastAPI backend (loads the trained model)
-├── src/loan_model.pkl              # Trained model (loaded by api.py)
-└── data/                           # Dataset (not committed)
+loan-default-predictor/                 # Git repository root
+├── Streamlit_app.py                    # Single entry file: runs backend + dashboard (Streamlit Cloud)
+├── .gitignore
+├── readme.md
+├── start-db.bat                        # Helper script for the local PostgreSQL
+├── loan-risk-predictor/                # Application code
+│   ├── dashboard/                      # Streamlit front end
+│   │   ├── app.py                      # Home page + backend health check
+│   │   ├── requirements.txt
+│   │   ├── .env                        # Backend URL (not committed)
+│   │   ├── .streamlit/                 # Streamlit settings folder (currently empty)
+│   │   ├── api/
+│   │   │   ├── __init__.py
+│   │   │   └── client.py               # ALL backend API calls live here
+│   │   ├── assets/                     # Images / static files (currently empty)
+│   │   ├── components/
+│   │   │   ├── __init__.py
+│   │   │   ├── charts.py               # Risk gauge
+│   │   │   └── metrics.py
+│   │   ├── pages/
+│   │   │   ├── 1_Single_Prediction.py
+│   │   │   ├── 2_Batch_Scoring.py
+│   │   │   ├── 3_Explainability_SHAP.py
+│   │   │   ├── 4_Model_Performance.py
+│   │   │   └── 5_Drift_Monitoring.py
+│   │   └── utils/
+│   │       ├── __init__.py
+│   │       ├── config.py               # Reads API_BASE_URL from .env
+│   │       └── options.py              # Dropdown values for categorical inputs
+│   ├── src/
+│   │   ├── api.py                      # FastAPI backend (loads the trained model)
+│   │   └── loan_model.pkl              # Trained model (loaded by api.py)
+│   └── data/                           # Dataset (not committed)
+├── Postgresql/                         # Local PostgreSQL install + data (not committed)
+└── venv/                               # Virtual environment (not committed)
 ```
 
 ## Backend API
@@ -102,10 +114,12 @@ Planned endpoints (not implemented yet): batch scoring, SHAP explanation, model 
 ### 1. Create and activate a virtual environment
 
 ```powershell
-cd loan-risk-predictor
+cd loan-default-predictor
 python -m venv venv
 .\venv\Scripts\Activate.ps1
 ```
+
+(In Command Prompt use `.\venv\Scripts\activate.bat` instead.)
 
 If PowerShell blocks the script, run `Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass` and activate again.
 
@@ -113,7 +127,7 @@ If PowerShell blocks the script, run `Set-ExecutionPolicy -Scope Process -Execut
 
 ```powershell
 # Dashboard
-pip install -r dashboard\requirements.txt
+pip install -r loan-risk-predictor\dashboard\requirements.txt
 
 # Backend (FastAPI + model libraries)
 pip install fastapi uvicorn pandas joblib scikit-learn
@@ -123,7 +137,7 @@ Install `xgboost` as well if the saved model uses it.
 
 ### 3. Configure the backend URL
 
-Create `dashboard\.env`:
+Create `loan-risk-predictor\dashboard\.env`:
 
 ```
 API_BASE_URL=http://127.0.0.1:8000
@@ -132,10 +146,11 @@ REQUEST_TIMEOUT=10
 
 ### 4. Start the backend
 
-Run this from the folder that contains `api.py`:
+Run this from the `loan-risk-predictor` folder:
 
 ```powershell
-uvicorn api:app --reload
+cd loan-risk-predictor
+uvicorn src.api:app --reload
 ```
 
 Open `http://127.0.0.1:8000/docs` to see the interactive API documentation.
@@ -145,11 +160,20 @@ Open `http://127.0.0.1:8000/docs` to see the interactive API documentation.
 In a second terminal (with the virtual environment activated):
 
 ```powershell
-cd dashboard
+cd loan-risk-predictor\dashboard
 streamlit run app.py
 ```
 
 The dashboard opens in your browser. Use the sidebar to open **Single Prediction**.
+
+### Run backend + dashboard together (single command)
+
+`Streamlit_app.py` in the repository root starts the FastAPI backend (`loan-risk-predictor/src/api.py`) in a background thread and shows the dashboard in the same process. Pages in `dashboard/pages/` are picked up automatically (empty placeholder files are skipped). This is also the file used for Streamlit Community Cloud deployment (use the exact file name `Streamlit_app.py` as the main file path; Linux servers are case-sensitive).
+
+```powershell
+# from the repository root (loan-default-predictor), with the virtual environment activated
+streamlit run Streamlit_app.py
+```
 
 ## Notes
 
